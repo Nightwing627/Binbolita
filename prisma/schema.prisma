@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Administrator {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  name       String?   @db.VarChar(255)
+  lastname   String?   @db.VarChar(255)
+  active     Boolean   @default(true)
+  profileId  Int
+  phone      String?   @db.VarChar(255)
+  address    String?   @db.VarChar(255)
+  birth_date DateTime? @db.DateTime(0)
+  dni        String?   @db.VarChar(255)
+  pais_id    Int?
+  image      String?   @db.Text
+  updated_at DateTime? @updatedAt
+  pais       Pais?     @relation(fields: [pais_id], references: [id])
+  profile    Profile   @relation(fields: [profileId], references: [id])
+  Sorteo     Sorteo[]
+
+  @@index([pais_id], name: "pais_id")
+  @@index([profileId], name: "profileId")
+}
+
+model Profile {
+  id            Int             @id @default(autoincrement())
+  description   String?
+  administrator Administrator[]
+}
+
+model Config {
+  id                   Int      @id @default(autoincrement())
+  whatsapp_number      String?  @db.VarChar(255)
+  whatsapp_msg         String?  @db.VarChar(255)
+  facebook_show        Boolean?
+  facebook_text        String?  @db.VarChar(255)
+  twitter_show         Boolean?
+  twitter_text         String?  @db.VarChar(255)
+  pinterest_show       Boolean?
+  pinterest_text       String?  @db.VarChar(255)
+  skype_show           Boolean?
+  skype_text           String?  @db.VarChar(255)
+  instagram_show       Boolean?
+  instagram_text       String?  @db.VarChar(255)
+  telegram_show        Boolean?
+  telegram_text        String?  @db.VarChar(255)
+  whatsapp_faq_number  String?  @db.VarChar(255)
+  whatsapp_faq_text    String?  @db.VarChar(255)
+  text_responsabilidad String?  @db.Text
+  text_terminos_condiciones String? @db.Text
+  register_open       Boolean? @default(true)
+  whatsapp_footer  String?  @db.VarChar(255)
+  whatsapp_footer_text    String?  @db.VarChar(255)
+
+}
+
+model Pais {
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(255)
+  Administrator Administrator[]
+  customer      Customer[]
+}
+
+model Recarga {
+  id          Int      @id @default(autoincrement())
+  customer_id Int
+  number      String   @db.VarChar(255)
+  money       Decimal  @db.Decimal(10, 2)
+  created_at  DateTime
+  status      String   @db.VarChar(255)
+  customer    Customer @relation(fields: [customer_id], references: [id])
+
+  @@index([customer_id], name: "customer_id")
+}
+
+model Retiro {
+  id          Int      @id @default(autoincrement())
+  customer_id Int
+  number      String   @db.VarChar(255)
+  money       Decimal  @db.Decimal(10, 2)
+  created_at  DateTime
+  status      String   @db.VarChar(255)
+  message     String?  @db.LongText
+  customer    Customer @relation(fields: [customer_id], references: [id])
+
+  @@index([customer_id], name: "customer_id")
+}
+
+model Soporte_mensaje {
+  id         Int    @id @default(autoincrement())
+  name       String @db.VarChar(255)
+  email      String @db.VarChar(255)
+  city       String @db.VarChar(255)
+  cell       String @db.VarChar(255)
+  message    String @db.LongText
+  estado     String @db.VarChar(255)
+  created_at String @db.VarChar(255)
+}
+
+model Sorteo {
+  id              Int           @id @default(autoincrement())
+  administratorId Int
+  number          String        @db.VarChar(255)
+  type            String        @db.VarChar(255)
+  created_at      DateTime
+  status          String        @db.VarChar(255)
+  date            DateTime
+  administrator   Administrator @relation(fields: [administratorId], references: [id])
+
+  @@index([administratorId], name: "administratorId")
+}
+
+model Customer {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique @db.VarChar(255)
+  password   String    @db.VarChar(255)
+  active     Boolean   @default(true)
+  name       String    @db.VarChar(255)
+  celular    String?   @db.VarChar(255)
+  lastname   String?   @db.VarChar(255)
+  phone      String?   @db.VarChar(255)
+  address    String?   @db.VarChar(255)
+  birth_date DateTime? @db.DateTime(0)
+  dni        String?   @db.VarChar(255)
+  pais_id    Int
+  image      String?   @db.Text
+  updated_at DateTime? @updatedAt
+  money      Decimal?  @db.Decimal(10, 2)
+  pais       Pais      @relation(fields: [pais_id], references: [id])
+  recarga    Recarga[]
+  retiro     Retiro[]
+
+  Apuesta   Apuesta[]
+  Favoritos Favoritos[]
+  @@index([pais_id], name: "pais_id")
+}
+
+model System {
+  id              Int     @id @default(autoincrement())
+  horario_sistema String? @db.VarChar(255)
+  cierre_diurno   String? @db.VarChar(255)
+  cierre_nocturno String? @db.VarChar(255)
+}
+
+model Juego {
+  id            Int         @id @default(autoincrement())
+  name          String?     @db.VarChar(255)
+  multiplicator Int?
+  banner        String?     @db.Text
+  active        Boolean     @default(true)
+  maxNumbers    Int?
+  maxBetsUser   Int?
+  maxBetsGlobal Int?
+  maxBetsGame   Decimal? @default(0.0)
+  premioDiurno Int?
+  premioNocturno Int?
+  Apuesta       Apuesta[]
+  Favoritos     Favoritos[]
+  Faq           Faq[]
+}
+
+model Apuesta {
+  id          Int      @id @default(autoincrement())
+  numbers     String?  @db.Text
+  resultado   String?  @db.Text
+  date        String?  @db.VarChar(255)
+  sorteo      String?  @db.VarChar(255)
+  money       String?  @db.VarChar(255)
+  totalWon    String?  @db.VarChar(255)
+  customer_id Int
+  customer    Customer @relation(fields: [customer_id], references: [id])
+  juego_id    Int?
+  juego       Juego?   @relation(fields: [juego_id], references: [id])
+  created_at  DateTime
+  estado      String?  @db.VarChar(255)
+}
+
+model Favoritos {
+  id          Int       @id @default(autoincrement())
+  nombre      String?   @db.Text
+  customer_id Int
+  customer    Customer  @relation(fields: [customer_id], references: [id])
+  numbers     String?   @db.Text
+  created_at  DateTime?
+  juego_id    Int?
+  juego       Juego?    @relation(fields: [juego_id], references: [id])
+  date        String?   @db.VarChar(255)
+  sorteo      String?   @db.VarChar(255)
+}
+
+model Faq {
+  id       Int     @id @default(autoincrement())
+  title    String? @db.Text
+  text     String? @db.Text
+  juego_id Int?
+  juego    Juego?  @relation(fields: [juego_id], references: [id])
+  orden   Int?
+}
+
+model Charada {
+  id     Int     @id @default(autoincrement())
+  number String? @db.VarChar(255)
+  mean   String? @db.Text
+}
+model Visitas{
+    id     Int     @id @default(autoincrement())
+  ip   String? @db.Text
+  fecha String? @db.Text
+}
